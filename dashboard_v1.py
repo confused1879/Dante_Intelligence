@@ -691,6 +691,115 @@ def plot_mental_resilience_over_time():
     # Visualize metrics
     visualize_mental_resilience_over_time(metrics_df)
 
+# Scatter Plot Function
+def plot_top_performances():
+    st.subheader("Top Performances and Notable Matches")
+    
+    # Load matches data
+    matches_df = load_matches_data()
+    
+    # Filter out matches without necessary data
+    matches_df = matches_df.dropna(subset=['rating', 'win_margin'])
+    
+    # Create a new column for match significance
+    matches_df['match_significance'] = matches_df['is_notable'].apply(lambda x: 'Notable' if x else 'Regular')
+    
+    # Sidebar filters
+    st.sidebar.header("Scatter Plot Filters")
+    min_rating = st.sidebar.slider("Minimum UTR Rating", 
+                                   min_value=float(matches_df['rating'].min()), 
+                                   max_value=float(matches_df['rating'].max()), 
+                                   value=float(matches_df['rating'].min()))
+    max_rating = st.sidebar.slider("Maximum UTR Rating", 
+                                   min_value=float(matches_df['rating'].min()), 
+                                   max_value=float(matches_df['rating'].max()), 
+                                   value=float(matches_df['rating'].max()))
+    selected_significance = st.sidebar.multiselect("Match Significance", 
+                                                   options=['Notable', 'Regular'], 
+                                                   default=['Notable', 'Regular'])
+    
+    # Apply filters
+    filtered_df = matches_df[
+        (matches_df['rating'] >= min_rating) &
+        (matches_df['rating'] <= max_rating) &
+        (matches_df['match_significance'].isin(selected_significance))
+    ]
+    
+    # Scatter Plot
+    fig = px.scatter(
+        filtered_df,
+        x='win_margin',
+        y='rating',
+        color='match_significance',
+        hover_data=['details', 'eventName', 'resultDate'],
+        title='UTR Rating vs. Win Margin',
+        labels={'win_margin': 'Win Margin (Games)', 'rating': 'UTR Rating'},
+        size='win_margin',
+        size_max=15
+    )
+    
+    fig.update_layout(
+        legend_title_text='Match Significance',
+        xaxis_title='Win Margin (Games)',
+        yaxis_title='UTR Rating'
+    )
+    
+    st.plotly_chart(fig)
+
+# Annotated Timeline Function
+def plot_annotated_timeline():
+    st.subheader("Annotated Timeline of Matches")
+    
+    # Load matches data
+    matches_df = load_matches_data()
+    
+    # Convert dates to datetime (already done in load_matches_data)
+    # Sort by date
+    matches_df = matches_df.sort_values('resultDate')
+    
+    # Create the timeline
+    fig = go.Figure()
+    
+    # Add all matches
+    fig.add_trace(go.Scatter(
+        x=matches_df['resultDate'],
+        y=matches_df['rating'],
+        mode='markers',
+        name='Matches',
+        marker=dict(
+            size=8,
+            color='lightblue',
+            opacity=0.6
+        ),
+        hoverinfo='none'  # Disable hover for regular matches
+    ))
+    
+    # Add notable matches
+    notable_matches = matches_df[matches_df['is_notable'] == True]
+    fig.add_trace(go.Scatter(
+        x=notable_matches['resultDate'],
+        y=notable_matches['rating'],
+        mode='markers+text',
+        name='Notable Matches',
+        marker=dict(
+            size=12,
+            color='red',
+            symbol='star'
+        ),
+        text=notable_matches['details'],
+        textposition='top center',
+        hoverinfo='text',
+        hovertext=notable_matches['details']
+    ))
+    
+    fig.update_layout(
+        title='Annotated Timeline of Matches',
+        xaxis_title='Date',
+        yaxis_title='UTR Rating',
+        hovermode='closest'
+    )
+    
+    st.plotly_chart(fig)
 
 def main():
     st.title("UTR Data Fetcher")
@@ -801,6 +910,7 @@ def main():
             
             # **Mental Resilience Over Time**
             plot_mental_resilience_over_time()
+
         except Exception as e:
             st.error(f"An error occurred: {e}")
 
