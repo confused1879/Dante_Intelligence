@@ -338,7 +338,38 @@ def create_match_visualizations(matches_df):
     matches_df['strenuousness'] = matches_df.apply(calculate_strenuousness, axis=1)
     matches_df['marker_size'] = abs(matches_df['win_margin']) * 2. + 4
 
+    # Group matches by event
+    matches_df['month'] = matches_df['resultDate'].dt.strftime('%B')
+    events = matches_df.groupby('eventName')
+    
     fig = go.Figure()
+    
+    # Add event highlighting rectangles
+    for event_name, event_data in events:
+        if len(event_data) > 1:  # Only add for multi-match events
+            start_date = event_data['resultDate'].min()
+            end_date = event_data['resultDate'].max()
+            
+            fig.add_shape(
+                type="rect",
+                x0=start_date,
+                x1=end_date,
+                y0=matches_df['rating'].min() - 0.1,
+                y1=matches_df['rating'].max() + 0.1,
+                fillcolor="lightgray",
+                opacity=0.2,
+                layer="below",
+                line_width=0,
+            )
+            
+            # Add event annotation
+            fig.add_annotation(
+                x=start_date,
+                y=matches_df['rating'].max() + 0.15,
+                text=event_name,
+                showarrow=False,
+                textangle=-45
+            )
     
     # Add main scatter plot
     fig.add_trace(
