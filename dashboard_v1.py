@@ -198,54 +198,78 @@ def extract_ratings_from_trend(ratings_df):
     return ratings_df
 
 def plot_data(ratings_df, player_name):
-    """
-    Creates a Plotly line chart for UTR ratings over time.
-
-    Args:
-        ratings_df: A pandas DataFrame with 'date' and 'rating' columns.
-        player_name: The name of the player for the chart title.
-
-    Returns:
-        A Plotly figure object.
-    """
-    if ratings_df.empty:
-        st.warning("Ratings DataFrame is empty. Cannot plot.")
-        return
-
-    # Calculate min and max ratings for bands
-    min_rating = ratings_df['rating'].min()
-    max_rating = ratings_df['rating'].max()
-
+    # Calculate moving average
+    ratings_df['MA7'] = ratings_df['rating'].rolling(window=7).mean()
+    
     fig = go.Figure()
+    
+    # Add main rating line
     fig.add_trace(go.Scatter(
         x=ratings_df['date'],
         y=ratings_df['rating'],
         name='UTR Rating',
         mode='lines+markers',
-        line=dict(color='blue')
+        line=dict(color='blue', width=2),
+        marker=dict(size=6)
     ))
-
-    # Add min/max bands
+    
+    # Add moving average
     fig.add_trace(go.Scatter(
         x=ratings_df['date'],
-        y=[min_rating] * len(ratings_df),
+        y=ratings_df['MA7'],
+        name='7-Day Average',
+        line=dict(color='rgba(0,0,255,0.3)', dash='dot')
+    ))
+    
+    # Add filled area between min/max
+    fig.add_trace(go.Scatter(
+        x=ratings_df['date'],
+        y=[ratings_df['rating'].max()] * len(ratings_df),
+        fill=None,
+        mode='lines',
+        line=dict(color='rgba(0,255,0,0.1)', dash='dot'),
+        name='Max Rating'
+    ))
+    
+    fig.add_trace(go.Scatter(
+        x=ratings_df['date'],
+        y=[ratings_df['rating'].min()] * len(ratings_df),
+        fill='tonexty',
+        mode='lines',
+        line=dict(color='rgba(255,0,0,0.1)', dash='dot'),
         name='Min Rating',
-        line=dict(dash='dot', color='red')
+        fillcolor='rgba(0,100,255,0.1)'
     ))
-    fig.add_trace(go.Scatter(
-        x=ratings_df['date'],
-        y=[max_rating] * len(ratings_df),
-        name='Max Rating',
-        line=dict(dash='dot', color='green')
-    ))
-
+    
+    # Add range annotations
+    fig.add_annotation(
+        x=ratings_df['date'].max(),
+        y=ratings_df['rating'].max(),
+        text=f"Peak: {ratings_df['rating'].max():.2f}",
+        showarrow=True,
+        arrowhead=1
+    )
+    
     fig.update_layout(
         title=f"UTR Rating History - {player_name}",
         xaxis_title="Date",
         yaxis_title="UTR Rating",
-        hovermode='x unified'
+        hovermode='x unified',
+        plot_bgcolor='white',
+        height=500,
+        showlegend=True,
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=1.05
+        )
     )
-
+    
+    # Add grid
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(0,0,0,0.1)')
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(0,0,0,0.1)')
+    
     return fig
 
 def process_search_results(response_data):
