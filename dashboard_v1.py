@@ -801,6 +801,21 @@ def plot_annotated_timeline():
     
     st.plotly_chart(fig)
 
+@st.cache(allow_output_mutation=True)
+def load_matches_data():
+    df = pd.read_csv('matches.csv')
+    df['resultDate'] = pd.to_datetime(df['resultDate'], errors='coerce')
+    # Calculate win_margin if not already present
+    if 'win_margin' not in df.columns:
+        df['win_margin'] = df.apply(
+            lambda row: calculate_total_games(eval(row['winnerSets']), eval(row['loserSets'])),
+            axis=1
+        )
+    # Identify notable matches if not already present
+    if 'is_notable' not in df.columns:
+        df['is_notable'] = df.apply(identify_notable_matches, axis=1)
+    return df
+
 def main():
     st.title("UTR Data Fetcher")
     init_auth()
