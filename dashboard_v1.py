@@ -807,7 +807,7 @@ def calculate_total_games(winner_sets, loser_sets):
         return sum(winner_sets) - sum(loser_sets)
     return 0
 
-@st.cache(allow_output_mutation=True)
+
 def load_matches_data():
     df = pd.read_csv('matches.csv')
     df['resultDate'] = pd.to_datetime(df['resultDate'], errors='coerce')
@@ -874,7 +874,7 @@ def main():
             save_eligible_results(eligible_results)
             
             rankings = data.get('extendedRatingProfile', {}).get('rankings', {})
-            save_rankings(rankings)
+            #save_rankings(rankings)
             
             st.success("Data fetched and saved successfully!")
 
@@ -910,27 +910,17 @@ def main():
             
             for category in eligible_results.keys():
                 filename = f"eligible_results_{category}.csv"
-                if os.path.exists(filename) and eligible_results[category]:
-                    st.subheader(f"Eligible Results - {category.capitalize()}")
-                    eligible_df = pd.read_csv(filename)
-                    st.dataframe(eligible_df.tail(5))
+                #if os.path.exists(filename) and eligible_results[category]:
+                    #st.subheader(f"Eligible Results - {category.capitalize()}")
+                    #eligible_df = pd.read_csv(filename)
+                    #st.dataframe(eligible_df.tail(5))
             
-            if os.path.exists("rankings.csv") and rankings:
-                st.subheader("Rankings")
-                rankings_df = pd.read_csv("rankings.csv")
-                st.dataframe(rankings_df.tail(5))
+            #if os.path.exists("rankings.csv") and rankings:
+            #    st.subheader("Rankings")
+            #    rankings_df = pd.read_csv("rankings.csv")
+            #    st.dataframe(rankings_df.tail(5))
             
-            # **Add Visualizations for Top Performances and Notable Matches**
-            st.header("Insights and Visualizations")
-            
-            # Scatter Plot for Top Performances
-            plot_top_performances()
-            
-            # Annotated Timeline for Notable Matches
-            plot_annotated_timeline()
-            
-            # **Mental Resilience Over Time**
-            plot_mental_resilience_over_time()
+
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
