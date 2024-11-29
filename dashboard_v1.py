@@ -801,6 +801,12 @@ def plot_annotated_timeline():
     
     st.plotly_chart(fig)
 
+
+def calculate_total_games(winner_sets, loser_sets):
+    if isinstance(winner_sets, list) and isinstance(loser_sets, list):
+        return sum(winner_sets) - sum(loser_sets)
+    return 0
+
 @st.cache(allow_output_mutation=True)
 def load_matches_data():
     df = pd.read_csv('matches.csv')
