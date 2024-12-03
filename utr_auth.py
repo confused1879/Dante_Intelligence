@@ -84,3 +84,25 @@ class UTRAuthManager:
         response = self.session.get(url, headers=headers, params=params)
         response.raise_for_status()
         return response.json()
+
+    def get_player_results(self, player_id, limit=None):
+        """
+        Get match results for a specific player.
+        
+        Args:
+            player_id (int): Player's UTR ID
+            limit (int, optional): Maximum number of results to return
+            
+        Returns:
+            dict: Player's match results from the API
+        """
+        headers = self.get_headers()
+        url = f"https://api.utrsports.net/v4/player/{player_id}/results"
+        
+        params = {}
+        if limit:
+            params['limit'] = limit
+            
+        response = self.session.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        return response.json()
