@@ -879,6 +879,18 @@ class CollegeFitDashboard:
                     # Process data
                     df = self.process_college_data(colleges_data)
                     
+                    # Apply filters
+                    if conference_filter != "All Conferences":
+                        df = df[df['Conference Name'] == conference_filter]
+                    
+                    if state_filter:
+                        df = df[df['State'].str.contains(state_filter.upper(), na=False)]
+                        
+                    if school_type == "Private Only":
+                        df = df[df['Private'] == 'Yes']
+                    elif school_type == "Public Only":
+                        df = df[df['Private'] == 'No']
+                    
                     if df.empty:
                         st.warning("No college data found for the given UTR rating and position.")
                         return
