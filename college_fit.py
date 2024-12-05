@@ -790,6 +790,33 @@ class CollegeFitDashboard:
                 value="1600 Amphitheatre Parkway, Mountain View, CA",
                 help="Enter your full home address (e.g., 1600 Amphitheatre Parkway, Mountain View, CA)"
             )
+            st.header("Filters")
+            
+            # Conference Filter
+            conferences = [
+                "All Conferences",
+                "Atlantic Coast Conference",
+                "Big 12 Conference",
+                "Big Ten Conference",
+                "Pac-12 Conference",
+                "Southeastern Conference"
+            ]
+            conference_filter = st.selectbox(
+                "Filter by Conference",
+                conferences
+            )
+            
+            # Private/Public Filter
+            school_type = st.radio(
+                "School Type",
+                ["All", "Private Only", "Public Only"]
+            )
+            
+            # State Filter
+            state_filter = st.text_input(
+                "Filter by State (optional)",
+                help="Enter state abbreviation (e.g., CA, NY)"
+            )
             
             # Weight Inputs
             st.subheader("Fit Score Weights")
