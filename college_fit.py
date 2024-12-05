@@ -430,8 +430,8 @@ class CollegeFitDashboard:
             return
         
         # Normalize 'Power 6 Avg' for marker sizes
-        size_min = 10
-        size_max = 50
+        size_min = 2
+        size_max = 15
         df_map['Size'] = self.normalize(df_map['Power 6 Avg']) * (size_max - size_min) + size_min
         
         # Create hover text for colleges
