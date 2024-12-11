@@ -106,3 +106,71 @@ class UTRAuthManager:
         response = self.session.get(url, headers=headers, params=params)
         response.raise_for_status()
         return response.json()
+
+    def search_players_advanced(self, top=100, skip=0, primary_tags=None, nationality=None, 
+                          division_id=None, conference_id=None, college_id=None,
+                          utr_type="verified", utr_team_type="singles", 
+                          show_tennis=True, show_pickleball=False):
+        headers = self.get_headers()
+        url = "https://api.utrsports.net/v2/search/players"
+        
+        # Base parameters
+        params = {
+            'top': top,
+            'skip': skip,
+            'utrType': utr_type,
+            'utrTeamType': utr_team_type,
+            'showTennisContent': str(show_tennis).lower(),
+            'showPickleballContent': str(show_pickleball).lower(),
+            'searchOrigin': 'searchPage'
+        }
+        
+        # Optional parameters - only add if not None
+        optional_params = {
+            'primaryTags': primary_tags,
+            'nationality': nationality,
+            'divisionId': division_id,
+            'conferenceId': conference_id,
+            'collegeId': college_id
+        }
+        
+        # Add optional parameters if they have values
+        params.update({k: v for k, v in optional_params.items() if v is not None})
+            
+        response = self.session.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        return response.json()
+
+    def search_colleges(self, utr_rating, position=6, top=100):
+        """
+        Search colleges using UTR API based on fit rating.
+        
+        Args:
+            utr_rating (float): Player's UTR rating for fit calculation
+            position (int): Position in lineup (default: 6)
+            top (int): Maximum number of results to return
+            
+        Returns:
+            dict: College search results from the API
+        """
+        headers = self.get_headers()
+        url = "https://api.utrsports.net/v2/search/colleges"
+        
+        params = {
+            'top': top,
+            'skip': 0,
+            'utrType': 'verified',
+            'utrTeamType': 'singles',
+            'utrFitRating': utr_rating,
+            'utrFitPosition': position,
+            'schoolClubSearch': 'true',
+            'sort': 'school.power6:desc'
+        }
+        
+        try:
+            response = self.session.get(url, headers=headers, params=params)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            print(f"Error fetching college data: {e}")
+            return {}
